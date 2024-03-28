@@ -7,8 +7,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import UserAvatar from "./UserAvatar"
+import { UserContext } from "../../context/UserContext"
+import { useContext } from "react"
+import { Button } from "./ui/button"
 
 function UserButton() {
+  const userContext = useContext(UserContext)
+  console.log(userContext)
+  if(!userContext.data) return (
+    <Button>
+      what
+    </Button>
+  )
+
   return (
     <DropdownMenu>
     <DropdownMenuTrigger>
