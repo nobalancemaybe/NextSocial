@@ -2,7 +2,7 @@ import Header from "./components/Header"
 import { Routes, Route } from 'react-router-dom';
 import HomePage from "./pages/HomePage";
 import {UserContextProvider} from "../context/UserContext"
-import { RegistrationPage } from "./pages/RegistrationPage";
+
 
 // import { UserData } from "../context/AppContext";
 // import { auth } from "../firebase-config"
@@ -52,7 +52,6 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="registration-page" element={<RegistrationPage />}/>
         </Routes>
  
       </UserContextProvider>
