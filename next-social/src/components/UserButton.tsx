@@ -10,14 +10,17 @@ import UserAvatar from "./UserAvatar"
 import { UserContext } from "../../context/UserContext"
 import { useContext } from "react"
 import { Button } from "./ui/button"
+import { Link } from "react-router-dom"
 
 function UserButton() {
   const userContext = useContext(UserContext)
   console.log(userContext)
-  if(!userContext.data) return (
-    <Button>
-      what
-    </Button>
+  if(!userContext?.data) return (
+    <Link to="registration-page">
+      <Button>
+        Register now
+      </Button>
+    </Link>
   )
 
   return (
