@@ -14,7 +14,7 @@ import { RegistrationForm } from "./RegistrationForm.tsx"
 
 function UserButton() {
   const userContext = useContext(UserContext)
-  console.log(userContext)
+
   if(!userContext?.data) return (   
       <RegistrationForm/>
     

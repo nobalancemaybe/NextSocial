@@ -6,8 +6,12 @@ export type AuthUser = {
 }
 
 export type UserData = {
-    name: string
+    username: string
     email: string
+    firstName: string
+    lastName: string
+    gender?: "male" | "female" | undefined
+    createdOn: string
 }
 type UserContextType = {
     data:AuthUser | null

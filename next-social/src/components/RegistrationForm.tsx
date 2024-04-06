@@ -60,7 +60,7 @@ const FormSchema = z.object({
   gender: z.enum(["male", "female", "other"], {
     required_error: "Choose other if you don't want to specify",
   }),
-  createdOn: z.number()
+  createdOn: z.string().datetime()
 })
 
 export const RegistrationForm = () => {
@@ -73,18 +73,18 @@ export const RegistrationForm = () => {
       firstName: "",
       lastName: "",
       gender: undefined,
-      createdOn: Date.now(),
+      createdOn: new Date().toISOString(),
     },
   })
 
-  function onSubmit() {
-    console.log("submited")
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log(data)
   }
 
   return (
 
 
-    <Dialog open>
+    <Dialog >
       <DialogTrigger asChild>
         <Button variant="outline">
           Register
