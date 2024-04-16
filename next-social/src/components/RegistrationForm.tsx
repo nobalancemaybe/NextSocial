@@ -1,7 +1,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import {  useForm } from "react-hook-form"
+import {  z } from "zod"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogDescription, DialogTitle, DialogFooter, DialogClose } from "./ui/dialog"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
+import { useEffect, useState } from "react"
 
 
 const FormSchema = z.object({
@@ -25,11 +26,16 @@ const FormSchema = z.object({
     })
     .max(15, {
       message: "Username can be up to 15 characters"
+    })
+    .regex(/^[a-zA-Z0-9_.+-]+$/, {
+      message: "Username is not valid"
     }),
+
   email: z.string()
     .email({
       message: "Invalid email"
     }),
+
   password: z.string().min(6, {
     message: "Password must be at least 6 characters long"
   }),
@@ -49,6 +55,9 @@ const FormSchema = z.object({
     })
     .max(15, {
       message: "Name can be up to 15 characters"
+    })
+    .regex(/^[a-zA-Z\s]*$/, {
+      message: "Username is not valid"
     }),
   lastName: z.string()
     .min(2, {
@@ -56,14 +65,20 @@ const FormSchema = z.object({
     })
     .max(15, {
       message: "Name can be up to 15 characters"
+    })
+    .regex(/^[a-zA-Z\s]*$/, {
+      message: "Username is not valid"
     }),
+
   gender: z.enum(["male", "female", "other"], {
     required_error: "Choose other if you don't want to specify",
   }),
+
   createdOn: z.string().datetime()
 })
 
 export const RegistrationForm = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -77,14 +92,19 @@ export const RegistrationForm = () => {
     },
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit (data: z.infer<typeof FormSchema>) {
     console.log(data)
+    setIsDialogOpen(false)
   }
 
+  useEffect(() => {
+    form.reset()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[isDialogOpen])
   return (
 
 
-    <Dialog >
+    <Dialog open={isDialogOpen} onOpenChange={(open) => setIsDialogOpen(open)}>
       <DialogTrigger asChild>
         <Button variant="outline">
           Register
@@ -137,7 +157,7 @@ export const RegistrationForm = () => {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="mail@example.com" {...field} />
+                    <Input placeholder="Username" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is your public display name.
@@ -169,7 +189,7 @@ export const RegistrationForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your password" {...field} />
+                    <Input type="password" placeholder="Enter your password" {...field} />
                   </FormControl>
                   <FormDescription>
                     Don't forget your password  😃
