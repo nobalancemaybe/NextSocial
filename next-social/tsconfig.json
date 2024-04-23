@@ -18,6 +18,9 @@
       "@logos/*": [
         "./images/logos/*"
       ],
+      "@services/*": [
+        "./services/*"
+      ],
     },
     /* Bundler mode */
     "moduleResolution": "bundler",

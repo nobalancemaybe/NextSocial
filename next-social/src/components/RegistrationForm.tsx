@@ -1,7 +1,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import {  useForm } from "react-hook-form"
-import {  z } from "zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,11 +16,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogDescription, DialogTitle, DialogFooter, DialogClose } from "./ui/dialog"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
+import { createUserHandle, getUserByHandle } from "../../services/users.service.ts"
+import { registerUser } from "../../services/auth.service.ts"
+import { UserContext } from "../../context/UserContext.tsx"
+import { useToast } from "./ui/use-toast.ts"
+import { UserData } from "types/types.ts"
 
-
-const FormSchema = z.object({
-  username: z.string()
+export const FormSchema = z.object({
+  handle: z.string()
     .min(2, {
       message: "Username must be at least 2 characters.",
     })
@@ -39,16 +43,7 @@ const FormSchema = z.object({
   password: z.string().min(6, {
     message: "Password must be at least 6 characters long"
   }),
-  // confirmPassword: z.string()
-  // .min(6, {
-  //   message: "Confirm password must be at least 6 characters long."
-  // })
-  // .refine((value, data) => {
-  //   return value === data.password;
-  // }, {
-  //   message: "Passwords do not match.",
-  //   path: ["confirmPassword"]
-  // })
+
   firstName: z.string()
     .min(2, {
       message: "Name must be at least 2 characters."
@@ -74,33 +69,67 @@ const FormSchema = z.object({
     required_error: "Choose other if you don't want to specify",
   }),
 
-  createdOn: z.string().datetime()
+  createdOn: z.string().datetime(),
+
+  uid: z.string()
 })
 
 export const RegistrationForm = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const userContext = useContext(UserContext)
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      username: "",
+      handle: "",
       email: "",
       password: "",
       firstName: "",
       lastName: "",
       gender: undefined,
       createdOn: new Date().toISOString(),
+      uid: "",
     },
   })
 
-  function onSubmit (data: z.infer<typeof FormSchema>) {
-    console.log(data)
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+
+    const user = await getUserByHandle(data.handle);
+    if (user.exists()) {
+      toast({
+        title: 'Registration not successful',
+        description: 'User already exists.',
+      });
+      return console.log(`Handle  already exists`);
+    }
+
+    const credentials = await registerUser(data.email, data.password);
+
+    const userData: UserData = {
+      handle: data.handle,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      gender: data.gender,
+      createdOn: data.createdOn,
+      uid: credentials.user.uid
+    }
+    
+    await createUserHandle(userData);
+
+    userContext?.setUser({ ...userData})
     setIsDialogOpen(false)
+
+    toast({
+      title: 'Registration Successful',
+      description: 'You have successfully registered.',
+    });
   }
 
   useEffect(() => {
     form.reset()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[isDialogOpen])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDialogOpen])
   return (
 
 
@@ -152,7 +181,7 @@ export const RegistrationForm = () => {
             </div>
             <FormField
               control={form.control}
-              name="username"
+              name="handle"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Username</FormLabel>
@@ -198,22 +227,7 @@ export const RegistrationForm = () => {
                 </FormItem>
               )}
             />
-            {/* <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <FormControl>
-                <Input placeholder="Enter your password" {...field} />
-                </FormControl>
-                <FormDescription>
-                Type your password again
-                </FormDescription>
-                <FormMessage />
-                </FormItem>
-              )}
-            /> */}
+
             <FormField
               control={form.control}
               name="gender"

@@ -1,25 +1,25 @@
 import { ref, push, get, query, equalTo, orderByChild, update } from 'firebase/database';
 import { db } from '../firebase-config';
 
-const fromTweetsDocument = snapshot => {
-  const tweetsDocument = snapshot.val();
+const fromPostsDocument = snapshot => {
+  const postsDocument = snapshot.val();
 
-  return Object.keys(tweetsDocument).map(key => {
-    const tweet = tweetsDocument[key];
+  return Object.keys(postsDocument).map(key => {
+    const post = postsDocument[key];
 
     return {
-      ...tweet,
+      ...post,
       id: key,
-      createdOn: new Date(tweet.createdOn),
-      likedBy: tweet.likedBy ? Object.keys(tweet.likedBy) : [],
+      createdOn: new Date(post.createdOn),
+      likedBy: post.likedBy ? Object.keys(post.likedBy) : [],
     };
   });
 }
 
-export const addTweet = (content, handle) => {
+export const addPost = async (content: object, handle: string) => {
 
   return push(
-    ref(db, 'tweets'),
+    ref(db, 'posts'),
     {
       content,
       author: handle,
@@ -28,28 +28,28 @@ export const addTweet = (content, handle) => {
   )
     .then(result => {
 
-      return getTweetById(result.key);
+      return getPostById(result.key);
     });
 };
 
-export const getTweetById = (id) => {
+export const getPostById = async (id: string | null) => {
 
-  return get(ref(db, `tweets/${id}`))
+  return get(ref(db, `posts/${id}`))
     .then(result => {
       if (!result.exists()) {
-        throw new Error(`Tweet with id ${id} does not exist!`);
+        throw new Error(`post with id ${id} does not exist!`);
       }
 
-      const tweet = result.val();
-      tweet.id = id;
-      tweet.createdOn = new Date(tweet.createdOn);
-      if (!tweet.likedBy) tweet.likedBy = [];
+      const post = result.val();
+      post.id = id;
+      post.createdOn = new Date(post.createdOn);
+      if (!post.likedBy) post.likedBy = [];
 
-      return tweet;
+      return post;
     });
 };
 
-export const getLikedTweets = (handle) => {
+export const getLikedPosts = async (handle: string) => {
 
   return get(ref(db, `users/${handle}`))
     .then(snapshot => {
@@ -58,59 +58,59 @@ export const getLikedTweets = (handle) => {
       }
 
       const user = snapshot.val();
-      if (!user.likedTweets) return [];
+      if (!user.likedPosts) return [];
 
-      return Promise.all(Object.keys(user.likedTweets).map(key => {
+      return Promise.all(Object.keys(user.likedPosts).map(key => {
 
-        return get(ref(db, `tweets/${key}`))
+        return get(ref(db, `posts/${key}`))
           .then(snapshot => {
-            const tweet = snapshot.val();
+            const post = snapshot.val();
 
             return {
-              ...tweet,
-              createdOn: new Date(tweet.createdOn),
+              ...post,
+              createdOn: new Date(post.createdOn),
               id: key,
-              likedBy: tweet.likedBy ? Object.keys(tweet.likedBy) : [],
+              likedBy: post.likedBy ? Object.keys(post.likedBy) : [],
             };
           });
       }));
     });
 };
 
-export const getTweetsByAuthor = (handle) => {
+export const getPostsByAuthor = async (handle: string) => {
 
-  return get(query(ref(db, 'tweets'), orderByChild('author'), equalTo(handle)))
+  return get(query(ref(db, 'posts'), orderByChild('author'), equalTo(handle)))
     .then(snapshot => {
       if (!snapshot.exists()) return [];
 
-      return fromTweetsDocument(snapshot);
+      return fromPostsDocument(snapshot);
     });
 };
 
-export const getAllTweets = () => {
+export const getAllPosts = async () => {
 
-  return get(ref(db, 'tweets'))
+  return get(ref(db, 'posts'))
     .then(snapshot => {
       if (!snapshot.exists()) {
         return [];
       }
 
-      return fromTweetsDocument(snapshot);
+      return fromPostsDocument(snapshot);
     });
 };
 
-export const likeTweet = (handle, tweetId) => {
+export const likePost = (handle: string, postId: string) => {
   const updateLikes = {};
-  updateLikes[`/tweets/${tweetId}/likedBy/${handle}`] = true;
-  updateLikes[`/users/${handle}/likedTweets/${tweetId}`] = true;
+  updateLikes[`/posts/${postId}/likedBy/${handle}`] = true;
+  updateLikes[`/users/${handle}/likedPosts/${postId}`] = true;
 
   return update(ref(db), updateLikes);
 };
 
-export const dislikeTweet = (handle, tweetId) => {
+export const dislikePost = (handle: string, postId: string) => {
   const updateLikes = {};
-  updateLikes[`/tweets/${tweetId}/likedBy/${handle}`] = null;
-  updateLikes[`/users/${handle}/likedTweets/${tweetId}`] = null;
+  updateLikes[`/posts/${postId}/likedBy/${handle}`] = null;
+  updateLikes[`/users/${handle}/likedPosts/${postId}`] = null;
 
   return update(ref(db), updateLikes);
 };

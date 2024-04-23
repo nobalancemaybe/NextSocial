@@ -10,10 +10,27 @@ import UserAvatar from "./UserAvatar"
 import { UserContext } from "../../context/UserContext"
 import { useContext } from "react"
 import { RegistrationForm } from "./RegistrationForm.tsx"
+import { useToast } from "./ui/use-toast.ts"
+import { useNavigate } from "react-router"
+import { logoutUser } from "../../services/auth.service.ts"
 
 
 function UserButton() {
   const userContext = useContext(UserContext)
+  const {toast} = useToast()
+  const navigate = useNavigate()
+  
+  const logout = async () => {
+    await logoutUser();
+    userContext?.setUser(null);
+
+    toast({
+      title: 'Logged out successfully',
+      description: 'You have been logged out.',
+    });
+
+    navigate('/');
+  };
 
   if(!userContext?.data) return (   
       <RegistrationForm/>
@@ -34,7 +51,7 @@ function UserButton() {
       <DropdownMenuItem>Profile</DropdownMenuItem>
       <DropdownMenuItem>Billing</DropdownMenuItem>
       <DropdownMenuItem>Team</DropdownMenuItem>
-      <DropdownMenuItem>Subscription</DropdownMenuItem>
+      <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
   )
