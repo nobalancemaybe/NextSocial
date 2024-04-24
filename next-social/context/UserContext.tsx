@@ -1,18 +1,6 @@
-import React from "react";
-import { createContext, useState } from "react";
-import { UserData } from "../types/types.ts"
-// export type AuthUser = {
-//     data: UserData
-// }
 
-// export type UserData = {
-//     handle: string
-//     email: string
-//     firstName: string
-//     lastName: string
-//     gender?: "male" | "female" | undefined
-//     createdOn: string
-// }
+import { createContext, useState, useEffect } from "react";
+import { UserData } from "../types/types.ts"
 
 type UserContextType = {
     data:UserData | null
@@ -26,7 +14,18 @@ type UserContextProviderProps = {
 export const UserContext = createContext<UserContextType | null>(null) //is done to avoid null checks, but its not working ({} as UserContextType)
 
 export const UserContextProvider = ({ children }: UserContextProviderProps) => {
-    const [data, setUser] = useState<UserData | null>(null)
+    const [data, setUser] = useState<UserData | null>(()=>{
+      const user = localStorage.getItem("user");
+      return user ? JSON.parse(user) : null;
+    });
+
+    useEffect(() => {
+      const user = localStorage.getItem("user");
+      if (user) {
+        setUser(JSON.parse(user));
+      }
+    }, []);
+    
     return (
     <UserContext.Provider value={{ data, setUser}}>
         {children}

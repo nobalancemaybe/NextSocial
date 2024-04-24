@@ -19,7 +19,7 @@ export default function Header() {
           {userContext?.data && (
             <>
               <Link to="/chat">
-                <MessageSquareIcon />
+                <MessageSquareIcon className="text-black dark:text-white"/>
               </Link>
             </>
           )}

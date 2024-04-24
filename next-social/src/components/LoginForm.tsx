@@ -54,6 +54,7 @@ export const LoginForm = () => {
       loginUser(userEmail, data.password);
       
       userContext?.setUser({ ...userData})
+      localStorage.setItem("user", JSON.stringify(userData));
       
       toast({
         title: 'Log In Successful',
