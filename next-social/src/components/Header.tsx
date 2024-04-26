@@ -27,7 +27,7 @@ export default function Header() {
           </form>
         </div>
         <div className="flex items-center justify-end px-6 space-x-4">
-          {userContext?.data && (
+          {userContext?.user && (
             <>
               <Link to="/">
                 <HomeIcon className="text-black dark:text-white " />

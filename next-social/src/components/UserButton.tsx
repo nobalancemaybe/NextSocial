@@ -34,7 +34,7 @@ function UserButton() {
     navigate('/');
   };
 
-  if (!userContext?.data) return (
+  if (!userContext?.user) return (
     <>
       <Login />
       <RegistrationForm />
@@ -51,7 +51,7 @@ function UserButton() {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>{userContext.data.handle}</DropdownMenuLabel>
+        <DropdownMenuLabel>{userContext.user.handle}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Profile</DropdownMenuItem>
         <DropdownMenuItem>Billing</DropdownMenuItem>

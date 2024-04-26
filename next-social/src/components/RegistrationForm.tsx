@@ -28,8 +28,8 @@ export const FormSchema = z.object({
     .min(2, {
       message: "Username must be at least 2 characters.",
     })
-    .max(15, {
-      message: "Username can be up to 15 characters"
+    .max(20, {
+      message: "Username must be up to 20 characters"
     })
     .regex(/^[a-zA-Z0-9_.+-]+$/, {
       message: "Username is not valid"
