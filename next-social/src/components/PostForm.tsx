@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { v4 as uuidv4 } from 'uuid'
+import { uploadImage } from '../../services/image.service'
 
 const FormSchema = z.object({
   author: z.string(),
@@ -29,31 +30,57 @@ function PostForm() {
   const [preview, setPreview] = useState<string | null>(null)
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("change")
+  
     const file = event.target.files?.[0];
     if(file) {
       setPreview(URL.createObjectURL(file))
     }
   };
 
-  const form =  useForm<z.infer<typeof FormSchema>>({
+  const form =  useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      author: "",
+      author: user?.handle,
       textContent: "",
       createdOn: new Date().toISOString(),
       uid: uuidv4(),
+      image: undefined,
     },
   })
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log(data)
+  const onSubmit = async (data) => {
+    console.log("submit")
+    try {
+      // Check if there's an image to upload
+      let imageUrl: string | undefined = "";
+      if (data.image) {
+        const imageFile = fileInputRef.current?.files?.[0];
+        if (imageFile) {
+          // Upload image to Firebase Storage
+          imageUrl = await uploadImage(imageFile);
+        }
+      }
+  
+      // Merge form data with imageUrl
+      const postData = { ...data, imageUrl };
+  
+      // Handle form submission (e.g., save data to database)
+      console.log("Submitted data:", postData);
+      // Add your logic to save postData to your database or API
+  
+      // Reset form after submission
+      form.reset();
+      setPreview(null); // Clear preview
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      // Handle error (e.g., show error message to the user)
+    }
   }
 
 
   return (
     <div className="mb-2">
-      <form ref={ref} onSubmit={form.handleSubmit(onSubmit)} className="p-3 bg-white dark:bg-gray-800 rounded-lg">
+      <form ref={ref} onSubmit={form.handleSubmit(onSubmit)} className="p-3 bg-white dark:bg-slate-600 rounded-lg">
         <div className="flex items-center space-x-2">
           <Avatar>
             <AvatarImage src={user?.profilePictureUrl}/>
@@ -79,7 +106,7 @@ function PostForm() {
            onChange={handleImageChange} 
           />
 
-          <button type="submit" hidden>
+          <button type="submit" >
             Post
           </button>
         </div>
