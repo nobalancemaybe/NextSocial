@@ -3,25 +3,12 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { UserContext } from '../../context/UserContext'
 import { Button } from './ui/button'
 import { ImageIcon, XIcon } from 'lucide-react'
-import { z } from 'zod'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { v4 as uuidv4 } from 'uuid'
 import { uploadImage } from '../../services/image.service'
 
-const FormSchema = z.object({
-  author: z.string(),
 
-  textContent: z.string()
-   .min(1)
-   .max(260),
 
-  imageUrl: z.string(),
-  
-  createdOn: z.string().datetime(),
-
-  uid: z.string()
-})
 function PostForm() {
   const userContext = useContext(UserContext)
   const user = userContext?.user
@@ -38,7 +25,6 @@ function PostForm() {
   };
 
   const form =  useForm({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       author: user?.handle,
       textContent: "",
@@ -48,12 +34,14 @@ function PostForm() {
     },
   })
 
-  const onSubmit = async (data) => {
-    console.log("submit")
+  const onSubmit = async (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const dataCopy = data;
+    ref.current?.reset();
+    console.log(dataCopy, "1")
     try {
       // Check if there's an image to upload
       let imageUrl: string | undefined = "";
-      if (data.image) {
+      if (dataCopy.image) {
         const imageFile = fileInputRef.current?.files?.[0];
         if (imageFile) {
           // Upload image to Firebase Storage
@@ -69,7 +57,7 @@ function PostForm() {
       // Add your logic to save postData to your database or API
   
       // Reset form after submission
-      form.reset();
+     
       setPreview(null); // Clear preview
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -106,9 +94,11 @@ function PostForm() {
            onChange={handleImageChange} 
           />
 
-          <button type="submit" >
+          <Button
+           type="submit"
+           variant="secondary">
             Post
-          </button>
+          </Button>
         </div>
 
         {preview && (

@@ -8,6 +8,14 @@ export type UserData = z.infer<typeof registrationData>;
 
 export type RegistrationData = z.infer<typeof registrationData>;
 
+export interface PostData {
+  author: string | undefined;
+  textContent: string;
+  createdOn: string;
+  uid: string;
+  image?: FileList;
+}
+
 export type User ={
   handle: string;
   email: string;

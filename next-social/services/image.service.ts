@@ -5,8 +5,10 @@ import { v4 } from "uuid"; // so that we can generate a unique name for each ima
 
 export const uploadImage = async (image: File) => {
   try {
+      console.log("Uploading image")
       const imageRef = ref(storage, `images/${image.name + v4()}`);
       await uploadBytes(imageRef, image);
+      console.log(imageRef)
       const url = await getDownloadURL(imageRef);
       return url;
   } catch (error) {
